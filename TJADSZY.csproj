@@ -15,7 +15,7 @@
   </ItemGroup>
   
   <PropertyGroup Condition="$(Configuration) == 'Debug' AND $([MSBuild]::IsOSPlatform(Windows))">
-    <StartProgram>D:\001SOFTWARE\RHINO\System\Rhino.exe</StartProgram>
+    <StartProgram>D:\07RHINO\System\Rhino.exe</StartProgram>
     <StartArguments></StartArguments>
     <StartAction>Program</StartAction>
   </PropertyGroup>

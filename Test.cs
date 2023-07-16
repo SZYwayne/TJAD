@@ -17,7 +17,7 @@ namespace TJADSZY
         public Test()
           : base("Test", "Nickname",
               "Description",
-              "TJADSZY", "Test")
+              "TJADSZY", "TestForlayerObjects")
         {
         }
 
@@ -37,6 +37,7 @@ namespace TJADSZY
             pManager.AddNumberParameter("Brep", "AreaBrep", "test", GH_ParamAccess.item);
             pManager.AddNumberParameter("Curve", "LenCurve", "test", GH_ParamAccess.item);
             pManager.AddNumberParameter("Num", "OtherNum", "test", GH_ParamAccess.item);
+            pManager.AddGenericParameter("test", "test", "test", GH_ParamAccess.item) ;
         }
 
         /// <summary>
@@ -52,90 +53,104 @@ namespace TJADSZY
             {
                 string layName = "brep";
                 RhinoObject[] tmpLayObjs = RhinoDoc.ActiveDoc.Objects.FindByLayer(layName);
-                double sumArea = 0;
-                foreach (RhinoObject robj in tmpLayObjs)
-                {
-                    if (robj != null)
-                    {
-                        //if (robj.ObjectType == ObjectType.Brep || robj.ObjectType == ObjectType.Surface || robj.ObjectType == ObjectType.Extrusion)
-                        //{
-                        //    sumArea += AreaMassProperties.Compute(robj.Geometry as Brep).Area;
-                        //}
-                        if (robj.ObjectType == ObjectType.Brep)
-                        {
-                            sumArea += AreaMassProperties.Compute(robj.Geometry as Brep).Area;
-                        }
-                        else if (robj.ObjectType == ObjectType.Mesh)
-                        {
-                            sumArea += AreaMassProperties.Compute(robj.Geometry as Mesh).Area;
-                        }
-                        else
-                        {
-                            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
-                            //return;
-                        }
-                    }
-                    else
-                    {
-                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
-                        //return;
-                    }
-                }
+                double tmpSumArea = sumArea(layName, tmpLayObjs);
 
+                layName = "curve";
+                tmpLayObjs = RhinoDoc.ActiveDoc.Objects.FindByLayer(layName);
+                double tmpSumLen = sumLen(layName, tmpLayObjs);
 
-                //layName = "curve";
-                //tmpLayObjs = RhinoDoc.ActiveDoc.Objects.FindByLayer(layName);
-                //double sumLen = 0;
-                //foreach (RhinoObject robj in tmpLayObjs)
-                //{
-                //    if (robj != null)
-                //    {
-                //        if (robj.ObjectType == ObjectType.Curve)
-                //        {
-                //            sumArea += LengthMassProperties.Compute(robj.Geometry as Curve).Length;
-                //        }
-                //        else
-                //        {
-                //            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
-                //        }
-                //    }
-                //    else
-                //    {
-                //        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
-                //    }
-                //}
+                layName = "others";
+                tmpLayObjs = RhinoDoc.ActiveDoc.Objects.FindByLayer(layName);
+                int tmpSumNum = sumNum(layName, tmpLayObjs);
 
-                //layName = "others";
-                //tmpLayObjs = RhinoDoc.ActiveDoc.Objects.FindByLayer(layName);
-                //double sumNum = 0;
-                //foreach (RhinoObject robj in tmpLayObjs)
-                //{
-                //    if (robj != null)
-                //    {
-                //        sumNum++;
-                //    }
-                //    else
-                //    {
-                //        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
-                //    }
-                //}
-
-                DA.SetData("Brep", sumArea);
-                //DA.SetData("Curve", sumLen);
-                //DA.SetData("Num", sumNum);
+                DA.SetData("Brep", tmpSumArea);
+                DA.SetData("Curve", tmpSumLen);
+                DA.SetData("Num", tmpSumNum);
             }
-
-
         }
 
         public string layErrorMassage(string layName)
         {
-            //return string.Format("该图层有问题:{}", layName);
-            return "该图层有问题";
+            return string.Format("该图层有问题: {0}", layName);
         }
 
+        public double sumArea(string layName, RhinoObject[] tmpLayObjs)
+        {
+            double sum = 0;
+            foreach (RhinoObject robj in tmpLayObjs)
+            {
+                if (robj != null)
+                {
+                    if (robj.ObjectType == ObjectType.Brep)
+                    {
+                        sum += AreaMassProperties.Compute(robj.Geometry as Brep).Area;
+                    }
+                    else if (robj.ObjectType == ObjectType.Extrusion)
+                    {
+                        sum += AreaMassProperties.Compute(robj.Geometry as Extrusion).Area;
+                    }
+                    else if (robj.ObjectType == ObjectType.Surface)
+                    {
+                        sum += AreaMassProperties.Compute(robj.Geometry as Surface).Area;
+                    }
+                    else if (robj.ObjectType == ObjectType.Mesh)
+                    {
+                        sum += AreaMassProperties.Compute(robj.Geometry as Mesh).Area;
+                    }
+                    else
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
+                    }
+                }
+                else
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
+                }
+            }
+            return sum;
+        }
 
+        public double sumLen(string layName, RhinoObject[] tmpLayObjs)
+        {
+            double sum = 0;
+            foreach (RhinoObject robj in tmpLayObjs)
+            {
+                if (robj != null)
+                {
+                    if (robj.ObjectType == ObjectType.Curve)
+                    {
+                        sum += LengthMassProperties.Compute(robj.Geometry as Curve).Length;
+                    }
+                    else
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
+                        //DA.SetData("test", robj.ObjectType);
+                    }
+                }
+                else
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
+                }
+            }
+            return sum;
+        }
 
+        public int sumNum(string layName, RhinoObject[] tmpLayObjs)
+        {
+            int sum = 0;
+            foreach (RhinoObject robj in tmpLayObjs)
+            {
+                if (robj != null)
+                {
+                    sum++;
+                }
+                else
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
+                }
+            }
+            return sum;
+        }
 
 
         /// <summary>

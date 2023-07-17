@@ -11,6 +11,7 @@ using System.Runtime;
 using Rhino;
 using Rhino.DocObjects;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Rhino.NodeInCode;
 
 
 namespace TJADSZY
@@ -25,9 +26,9 @@ namespace TJADSZY
         /// new tabs/panels will automatically be created.
         /// </summary>
         public TJADSZYComponent()
-          : base("TJADSZY", "Nickname",
-            "Description",
-            "TJADSZY", "Base")
+          : base("TJADSZY", "SL",
+            "专为建筑提供给工经的建筑各部分量的统计和计算使用，尤其是非线性的室内装修造型使用",
+            "TJADSZY", "Calculation")
         {
         }
 
@@ -55,7 +56,6 @@ namespace TJADSZY
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("test", "test", "test", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -67,27 +67,27 @@ namespace TJADSZY
         {
             #region get variables from outside
             bool run = false;
-            DA.GetData(0, ref run);
+            if (!DA.GetData(0, ref run)) return;
             string filePath = "C:\\test.xlsx";
-            DA.GetData(1, ref filePath);
+            if (!DA.GetData(1, ref filePath)) return;
             string cellName = "A1";
-            DA.GetData(2, ref cellName);
+            if (!DA.GetData(2, ref cellName)) return;
             List<string> titleNames = new List<string>();
-            DA.GetDataList(3, titleNames);
+            if (!DA.GetDataList(3, titleNames)) return;
             List<string> wsNames = new List<string>();
-            DA.GetDataList(4, wsNames);
+            if (!DA.GetDataList(4, wsNames)) return;
             double modBLQM = 1;
-            DA.GetData("modForBLQM", ref modBLQM);
+            if (!DA.GetData("modForBLQM", ref modBLQM)) return;
             double modQTQM = 1;
-            DA.GetData("modForQTQM", ref modQTQM);
+            if (!DA.GetData("modForQTQM", ref modQTQM)) return;
             double modDD = 1;
-            DA.GetData("modForDD", ref modDD);
+            if (!DA.GetData("modForDD", ref modDD)) return;
             double modDDFB = 1;
-            DA.GetData("modForDDFB", ref modDDFB);
+            if (!DA.GetData("modForDDFB", ref modDDFB)) return;
             double modDM = 1;
-            DA.GetData("modForDM", ref modDM);
+            if (!DA.GetData("modForDM", ref modDM)) return;
             double modLG = 1;
-            DA.GetData("modForLG", ref modLG);
+            if (!DA.GetData("modForLG", ref modLG)) return;
             #endregion
 
             #region make column widths and row heights
@@ -243,7 +243,7 @@ namespace TJADSZY
                                 tmpCellName = Convert.ToChar(cellName[0] + 6).ToString() + (Convert.ToInt32(cellName[1].ToString()) + matchIndex).ToString();
                                 workbook.Worksheet(wsNames[i]).Cell(tmpCellName).Value = sumL;
                             }
-                            else if (match.Groups[5].Value == "个")
+                            else
                             {
                                 int sumN = 0;
                                 sumN = sumNum(layName, tmpLayObjs);
@@ -252,11 +252,6 @@ namespace TJADSZY
                                 workbook.Worksheet(wsNames[i]).Cell(tmpCellName).Value = sumN;
                                 tmpCellName = Convert.ToChar(cellName[0] + 6).ToString() + (Convert.ToInt32(cellName[1].ToString()) + matchIndex).ToString();
                                 workbook.Worksheet(wsNames[i]).Cell(tmpCellName).Value = sumN;
-                            }
-                            else
-                            {
-                                //AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "有问题");
-                                DA.SetData("test", match.Groups[5].Value);
                             }
 
                             //make others row height
@@ -278,32 +273,14 @@ namespace TJADSZY
         public double sumArea(string layName, RhinoObject[] tmpLayObjs)
         {
             double sum = 0;
+            List<GeometryBase> tmpGeom = new List<GeometryBase>();
             foreach (RhinoObject robj in tmpLayObjs)
             {
                 if (robj != null)
                 {
-                    if (robj.ObjectType == ObjectType.Brep)
+                    if (robj.ObjectType == ObjectType.Brep || robj.ObjectType == ObjectType.Extrusion || robj.ObjectType == ObjectType.Surface || robj.ObjectType == ObjectType.Mesh)
                     {
-                        sum += AreaMassProperties.Compute(robj.Geometry as Brep).Area;
-                    }
-                    else if (robj.ObjectType == ObjectType.Extrusion)
-                    {
-                        if (AreaMassProperties.Compute(robj.Geometry as Extrusion) != null)
-                        {
-                            sum += AreaMassProperties.Compute(robj.Geometry as Extrusion).Area;
-                        }
-                        else
-                        {
-                            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
-                        }
-                    }
-                    else if (robj.ObjectType == ObjectType.Surface)
-                    {
-                        sum += AreaMassProperties.Compute(robj.Geometry as Surface).Area;
-                    }
-                    else if (robj.ObjectType == ObjectType.Mesh)
-                    {
-                        sum += AreaMassProperties.Compute(robj.Geometry as Mesh).Area;
+                        tmpGeom.Add(robj.Geometry);
                     }
                     else
                     {
@@ -315,24 +292,27 @@ namespace TJADSZY
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
                 }
             }
+            var funArea = Components.FindComponent("Area").Delegate as dynamic;
+            var funMassAddition = Components.FindComponent("MassAddition").Delegate as dynamic;
+            sum = funMassAddition(funArea(tmpGeom)[0])[0][0];
             return sum;
         }
 
         public double sumLen(string layName, RhinoObject[] tmpLayObjs)
         {
             double sum = 0;
+            List<GeometryBase> tmpGeom = new List<GeometryBase>();
             foreach (RhinoObject robj in tmpLayObjs)
             {
                 if (robj != null)
                 {
                     if (robj.ObjectType == ObjectType.Curve)
                     {
-                        sum += LengthMassProperties.Compute(robj.Geometry as Curve).Length;
+                        tmpGeom.Add(robj.Geometry);
                     }
                     else
                     {
                         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
-                        //DA.SetData("test", robj.ObjectType);
                     }
                 }
                 else
@@ -340,6 +320,9 @@ namespace TJADSZY
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Error, layErrorMassage(layName));
                 }
             }
+            var funLen = Components.FindComponent("Length").Delegate as dynamic;
+            var funMassAddition = Components.FindComponent("MassAddition").Delegate as dynamic;
+            sum = funMassAddition(funLen(tmpGeom))[0][0];
             return sum;
         }
 

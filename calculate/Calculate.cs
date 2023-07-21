@@ -16,7 +16,7 @@ using Rhino.NodeInCode;
 
 namespace TJADSZY
 {
-    public class TJADSZYComponent : GH_Component
+    public class Calculate : GH_Component
     {
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
@@ -25,8 +25,8 @@ namespace TJADSZY
         /// Subcategory the panel. If you use non-existing tab or panel names, 
         /// new tabs/panels will automatically be created.
         /// </summary>
-        public TJADSZYComponent()
-          : base("TJADSZY", "SL",
+        public Calculate()
+          : base("Calculate", "SL",
             "专为建筑提供给工经的建筑各部分量的统计和计算使用，尤其是非线性的室内装修造型使用",
             "TJADSZY", "Calculation")
         {

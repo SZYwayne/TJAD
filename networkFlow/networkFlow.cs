@@ -23,6 +23,7 @@ namespace TJADSZY.networkFlow
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
+            pManager.AddCurveParameter("inputEdges", "edges", "test", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -30,6 +31,7 @@ namespace TJADSZY.networkFlow
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            pManager.AddPointParameter("outputPts", "nodes", "test", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -38,11 +40,21 @@ namespace TJADSZY.networkFlow
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            int from = 1;
-            int to = 1;
-            double capacity = 2.0;
+            #region get variables from outside
+            List<Curve> edges = new List<Curve>();
+            if (!DA.GetData("inputEdges", ref edges)) return;
+            #endregion
 
-            Edge eee = new Edge(from, to, capacity);
+            List<Point3d> allPts = new List<Point3d>();
+            foreach(Curve crv in edges)
+            {
+                allPts.Add(crv.PointAtStart);
+                allPts.Add(crv.PointAtEnd);
+            }
+
+            List<Point3d> nodes = DealWithInputs.noRepeatPts(allPts);
+
+
         }
 
         /// <summary>

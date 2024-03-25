@@ -15,7 +15,7 @@ namespace TJADSZY.networkFlow
         protected int visitedToken = 1;
         protected int[] visited;
 
-        protected bool solved;
+        protected bool solved = false;
         protected double maxFlow;
         protected List<Edge>[] graph;
 
@@ -31,13 +31,14 @@ namespace TJADSZY.networkFlow
         private void initializeEmptyFlowGraph()
         {
             graph = new List<Edge>[n];
+
             for (int i = 0; i < n; i++) graph[i] = new List<Edge>();
         }
 
         public void addEdge(int from, int to, double capacity)
         {
             Edge e1 = new Edge(from, to, capacity);
-            Edge e2 = new Edge(to, from, capacity);
+            Edge e2 = new Edge(to, from, 0);
             e1.residual = e2;
             e2.residual = e1;
             graph[from].Add(e1);

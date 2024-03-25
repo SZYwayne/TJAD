@@ -35,5 +35,10 @@ namespace TJADSZY.networkFlow
             flow += bottleNeck;
             residual.flow -= bottleNeck;
         }
+
+        public string edgeInfo()
+        {
+            return String.Format("(flow:{0}, capacity:{1})", flow, capacity);
+        }
     }
 }

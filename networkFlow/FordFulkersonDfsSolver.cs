@@ -19,7 +19,7 @@ namespace TJADSZY.networkFlow
             for ( double f = dfs(s, INF); f!= 0; f = dfs(s, INF))
             {
                 visitedToken++;
-                maxFlow = f;
+                maxFlow += f;
             }
         }
 

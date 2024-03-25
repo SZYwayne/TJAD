@@ -23,9 +23,9 @@
   <PropertyGroup Condition="$(Configuration) == 'Debug' AND $([MSBuild]::IsOSPlatform(Windows))">
     <StartProgram>D:\001SOFTWARE\RHINO\System\Rhino.exe</StartProgram>
     <StartArguments>
-		/runscript="_-RunScript(
+		/runscript="_-RunScript (
 		Set GH = Rhino.GetPlugInObject(""Grasshopper"")
-		Call GH.OpenDocument(""D:\000SZY\99_Other\02Study\10CforGH\02GHPlugin\TJADSZY\networkFlow\Example.gh"")
+		Call GH.OpenDocument(""D:\000SZY\99_Other\02Study\10CforGH\02GHPlugin\TJADSZY\package\package.gh"")
 		)"</StartArguments>
     <StartAction>Program</StartAction>
   </PropertyGroup>

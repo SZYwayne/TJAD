@@ -23,7 +23,6 @@ namespace TJADSZY.genSchool
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            //pManager.AddNumberParameter("studentNumber", "SNum", "学生人数", GH_ParamAccess.list);
             pManager.AddNumberParameter("plotRatio", "PR", "容积率(默认为1.5)", GH_ParamAccess.item, 1.5);
             pManager.AddPointParameter("boundaryPoints", "nakedPts", "矩形的边界点", GH_ParamAccess.list);
             pManager.AddCurveParameter("playgroundS", "PGs", "最小操场", GH_ParamAccess.list);
@@ -37,8 +36,8 @@ namespace TJADSZY.genSchool
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("test", "test", "test", GH_ParamAccess.item);
-            pManager.AddCurveParameter("crv", "crv", "crv", GH_ParamAccess.item);
+            pManager.AddPointParameter("test", "test", "test", GH_ParamAccess.item);
+            pManager.AddCurveParameter("crv", "crv", "crv", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -51,9 +50,9 @@ namespace TJADSZY.genSchool
             List<Curve> PGs = new List<Curve>();
             if (!DA.GetDataList("playgroundS", PGs)) return;
             List<Curve> PGm = new List<Curve>();
-            if (!DA.GetDataList("playgroundM", PGs)) return;
+            if (!DA.GetDataList("playgroundM", PGm)) return;
             List<Curve> PGl = new List<Curve>();
-            if (!DA.GetDataList("playgroundL", PGs)) return;
+            if (!DA.GetDataList("playgroundL", PGl)) return;
             List<Point3d> nakedPts = new List<Point3d>();
             if (!DA.GetDataList("boundaryPoints", nakedPts)) return;
             double dayFactor = 0;
@@ -63,14 +62,14 @@ namespace TJADSZY.genSchool
             #endregion
 
             #region set student number
-            List<double> temp = utilities.area(utilities.polyline(nakedPts, true));
-            double totalArea = temp[0];
-            int SNum = Convert.ToInt32(totalArea * PR);
-            DA.SetData("test", SNum);
+            double totalArea = utilities.area(utilities.polyline(nakedPts, true))[0] * PR;
+            int SNum = Convert.ToInt32(totalArea/(7+0.7+1.2+1.2));
+            List<Curve> tmpCrv = utilities.PGreturn(SNum, PGs, PGm, PGl, nakedPts);
+            Point3d tmp = utilities.test(SNum, PGs, PGm, PGl, nakedPts);
+            DA.SetData("test", tmp);
+            DA.SetDataList("crv", tmpCrv);
             #endregion
 
-            //List<double> temp = utilities.area(utilities.polyline(nakedPts, true));
-            //DA.SetData("crv", tmpCrv);
         }
 
         /// <summary>

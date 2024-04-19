@@ -36,8 +36,8 @@ namespace TJADSZY.genSchool
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddPointParameter("test", "test", "test", GH_ParamAccess.item);
-            pManager.AddCurveParameter("crv", "crv", "crv", GH_ParamAccess.list);
+            pManager.AddCurveParameter("outputPG", "PG", "playground", GH_ParamAccess.list);
+            pManager.AddBoxParameter("outputTeaching", "teaching", "teachingBuildings", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -62,14 +62,15 @@ namespace TJADSZY.genSchool
             #endregion
 
             #region set student number
-            double totalArea = utilities.area(utilities.polyline(nakedPts, true))[0] * PR;
-            int SNum = Convert.ToInt32(totalArea/(7+0.7+1.2+1.2));
-            List<Curve> tmpCrv = utilities.PGreturn(SNum, PGs, PGm, PGl, nakedPts);
-            Point3d tmp = utilities.test(SNum, PGs, PGm, PGl, nakedPts);
-            DA.SetData("test", tmp);
-            DA.SetDataList("crv", tmpCrv);
+            int SNum = utilities.SNum(nakedPts, PR, PGs, PGm, PGl);
             #endregion
 
+            #region outputs
+
+            DA.SetDataList("outputPG", utilities.PGreturn(PGs, PGm, PGl, nakedPts));
+            DA.SetDataList("outputTeaching", utilities.TeachBuilding(SNum, utilities.PGcenPt(PGs, PGm, PGl, nakedPts), nakedPts, dayFactor));
+
+            #endregion
         }
 
         /// <summary>

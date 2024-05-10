@@ -38,6 +38,7 @@ namespace TJADSZY.genSchool
         {
             pManager.AddCurveParameter("outputPG", "PG", "playground", GH_ParamAccess.list);
             pManager.AddBoxParameter("outputTeaching", "teaching", "teachingBuildings", GH_ParamAccess.list);
+            pManager.AddBoxParameter("outputOther", "other", "otherBuildings", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -61,14 +62,12 @@ namespace TJADSZY.genSchool
             if (!DA.GetData("plotRatio", ref PR)) return;
             #endregion
 
-            #region set student number
-            int SNum = utilities.SNum(nakedPts, PR, PGs, PGm, PGl);
-            #endregion
 
             #region outputs
 
-            DA.SetDataList("outputPG", utilities.PGreturn(PGs, PGm, PGl, nakedPts));
-            DA.SetDataList("outputTeaching", utilities.TeachBuilding(SNum, utilities.PGcenPt(PGs, PGm, PGl, nakedPts), nakedPts, dayFactor));
+            DA.SetDataList("outputPG", (List<Curve>)utilities.allBuildings(PGs, PGm, PGl, nakedPts, PR, dayFactor)[0]);
+            DA.SetDataList("outputTeaching", (List<Box>)utilities.allBuildings(PGs, PGm, PGl, nakedPts, PR, dayFactor)[1]);
+            DA.SetDataList("outputOther", (List<Box>)utilities.allBuildings(PGs, PGm, PGl, nakedPts, PR, dayFactor)[2]);
 
             #endregion
         }

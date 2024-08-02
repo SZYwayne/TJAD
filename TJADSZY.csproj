@@ -8,14 +8,9 @@
     <TargetExt>.gha</TargetExt>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
-	
-  <ItemGroup>
-    <Compile Remove="calculate\NewFolder\**" />
-    <EmbeddedResource Remove="calculate\NewFolder\**" />
-    <None Remove="calculate\NewFolder\**" />
-  </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.14.1" />
     <PackageReference Include="ClosedXML" Version="0.102.0" />
     <PackageReference Include="Grasshopper" Version="7.13.21348.13001" IncludeAssets="compile;build" />
   </ItemGroup>

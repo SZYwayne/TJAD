@@ -172,17 +172,6 @@ namespace TJADSZY.ai
                 image.Save(filePath);
                 image.Dispose();
 
-                this.Message = "Uploading";
-                string accessKeyId = "LTAI5tGrz81LmLrdaiMKkRpD";
-                string accessKeySecret = "vmBV77TIGYZ5FYhTFDiR26pPq0NyjG";
-                string endpoint = "oss-cn-hangzhou.aliyuncs.com";
-                string bucketName = "fc-sd-17ad442mg";
-                string objectName = nickName;
-
-                var ossClient = new OssClient(endpoint, accessKeyId, accessKeySecret);
-                var fileStream = new FileStream(filePath, FileMode.Open);
-                PutObjectResult putObjectResult = ossClient.PutObject(bucketName, objectName, fileStream);
-                fileStream.Close();
             }
 
 

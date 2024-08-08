@@ -6,25 +6,21 @@ using System.Text;
 using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using Rhino;
-using Rhino.Geometry;
 using System.Text.RegularExpressions;
 
 namespace TJADSZY.ai
 {
-    public class HTTPPostRequestComponent : GH_Component
+    public class PosttoRender : GH_Component
     {
-        /// <summary>
-        /// Initializes a new instance of the HTTPPostRequestComponent class.
-        /// </summary>
-        /// 
-
-
         private string _response = "";
         private bool _shouldExpire = false;
         private RequestState _currentState = RequestState.Off;
 
-        public HTTPPostRequestComponent()
-          : base("HTTPPostRequestComponent", "post",
+        /// <summary>
+        /// Initializes a new instance of the PosttoRender class.
+        /// </summary>
+        public PosttoRender()
+          : base("PosttoRender", "render",
               "Description",
               "TJADSZY", "aiRender")
         {
@@ -36,9 +32,7 @@ namespace TJADSZY.ai
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBooleanParameter("Send", "run", "perform the request or not", GH_ParamAccess.item, false);
-            pManager.AddTextParameter("URL", "url", "url for the request", GH_ParamAccess.item);
             pManager.AddTextParameter("BODY", "body", "request body", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Timeout", "maxTime", "time for the request in ms. if longer thanthis, it will break and fail.(default if 10000)", GH_ParamAccess.item, 10000);
         }
 
         /// <summary>
@@ -57,7 +51,7 @@ namespace TJADSZY.ai
         {
             if (_shouldExpire)
             {
-                switch(_currentState)
+                switch (_currentState)
                 {
                     case RequestState.Off:
                         this.Message = "Inactive";
@@ -96,21 +90,11 @@ namespace TJADSZY.ai
                 return;
             }
 
-            string url = "";
-            if (!DA.GetData("URL", ref url)) return;
             string body = "";
             if (!DA.GetData("BODY", ref body)) return;
-            int timeout = 0;
-            if (!DA.GetData("Timeout", ref timeout)) return;
 
-            if (url==null || url.Length==0)
-            {
-                _response = "empty url";
-                _currentState = RequestState.Error;
-                _shouldExpire = true;
-                ExpireSolution(true);
-                return;
-            }
+            string url = "http://sd-692728--proxy.fcv3.1585809013229189.cn-hangzhou.fc.devsapp.net/txt2img";
+            int timeout = 1200000;
 
             _currentState = RequestState.Requesting;
             this.Message = "Requesting...";
@@ -120,7 +104,7 @@ namespace TJADSZY.ai
 
         protected override void ExpireDownStreamObjects()
         {
-            if(_shouldExpire)
+            if (_shouldExpire)
             {
                 base.ExpireDownStreamObjects();
             }
@@ -190,7 +174,7 @@ namespace TJADSZY.ai
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("79F23F19-07C6-451F-8AD4-8307183C2988"); }
+            get { return new Guid("7D328C92-692E-4092-9688-8B5EF174D82F"); }
         }
     }
 }

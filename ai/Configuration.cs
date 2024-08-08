@@ -174,12 +174,12 @@ namespace TJADSZY.ai
 
                 this.Message = "Uploading";
                 string accessKeyId = "";
-                string accessKeySecret = "";
+                string accessKeyS = "";
                 string endpoint = "oss-cn-hangzhou.aliyuncs.com";
                 string bucketName = "fc-sd-17ad442mg";
                 string objectName = nickName;
 
-                var ossClient = new OssClient(endpoint, accessKeyId, accessKeySecret);
+                var ossClient = new OssClient(endpoint, accessKeyId, accessKeyS);
                 var fileStream = new FileStream(filePath, FileMode.Open);
                 PutObjectResult putObjectResult = ossClient.PutObject(bucketName, objectName, fileStream);
                 fileStream.Close();

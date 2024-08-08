@@ -173,8 +173,8 @@ namespace TJADSZY.ai
                 image.Dispose();
 
                 this.Message = "Uploading";
-                string accessKeyId = "LTAI5tGrz81LmLrdaiMKkRpD";
-                string accessKeySecret = "vmBV77TIGYZ5FYhTFDiR26pPq0NyjG";
+                string accessKeyId = "";
+                string accessKeySecret = "";
                 string endpoint = "oss-cn-hangzhou.aliyuncs.com";
                 string bucketName = "fc-sd-17ad442mg";
                 string objectName = nickName;

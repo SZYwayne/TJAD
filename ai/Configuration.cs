@@ -39,7 +39,7 @@ namespace TJADSZY.ai
             pManager.AddIntegerParameter("input_image_width", "width", "image width", GH_ParamAccess.item);
             pManager.AddIntegerParameter("input_image_height", "height", "image height", GH_ParamAccess.item);
             pManager.AddTextParameter("input_nickname", "nickname", "enter your nickname to make sure your uploaded file doesnt overlap with others", GH_ParamAccess.item, "");
-            pManager.AddBooleanParameter("input_controlnet_or_not", "controlnet", "use an image as input or not", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("input_controlnet_or_not", "controlnet", "use an image as input or not", GH_ParamAccess.list);
             pManager.AddTextParameter("input_namedView", "view", "view name", GH_ParamAccess.item, "");
             pManager.AddTextParameter("input_file_path", "file", "file path to hold your screenshot", GH_ParamAccess.item, "");
         }
@@ -74,13 +74,19 @@ namespace TJADSZY.ai
             prompt = prompt + "ARCHITECTURE,8k, realistic, 4k render, inspired by forster, inspired by SOM KPF,Best quality, masterpiece, MIR style";
             string negativePrompt = "";
             if (!DA.GetData("input_negative_prompt", ref negativePrompt)) return;
-            negativePrompt = negativePrompt + "(worst quality, low quality:1.4), 2 faces, cropped image, out of frame, deformed hands, twisted fingers, double image, malformed hands, extra limb, poorly drawn hands, missing limb, disfigured, cut-off, grain, low-res, deformed, blurry, poorly drawn face, mutation, floating limbs, disconnected limbs, long body, disgusting, mutilated, extra fingers, duplicate artifacts, morbid, gross proportions, missing arms, mutated hands, malformed, ugly, tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, bad anatomy, watermark, signature, cut off, low contrast, underexposed, overexposed, bad art, beginner, amateur, distorted face, blurry, draft, grainy, large scale, city scale, urban scale, people view, wierd picture, buildings in the middle";
+            negativePrompt = negativePrompt + "(worst quality, low quality:1.4), 2 faces, cropped image, out of frame, deformed hands, twisted fingers, double image, malformed hands, extra limb, poorly drawn hands, missing limb, disfigured, cut-off, grain, low-res, deformed, blurry, poorly drawn face, mutation, floating limbs, disconnected limbs, long body, disgusting, mutilated, extra fingers, duplicate artifacts, morbid, gross proportions, missing arms, mutated hands, malformed, ugly, tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, bad anatomy, watermark, signature, cut off, low contrast, underexposed, overexposed, bad art, beginner, amateur, distorted face, blurry, draft, grainy";
 
             List<string> lora = new List<string>();
             if (!DA.GetDataList<string>("input_lora", lora)) return;
-            for (int i=0;i<lora.Count; i++)
+            foreach (var value in lora)
             {
-                prompt += lora[i];
+                if (value == "<lora:GJHHYJYB01:1>") { prompt = "GJHHYJYB01,OUTDOORS,BUILDING," + prompt; }
+                if (value == "<lora:20_a:1>") { prompt = "ARCHITECTURE," + prompt; }
+                if (value == "<lora:snwvrch:1>") { prompt = "SNWVRCH," + prompt; }
+                if (value == "<lora:curved_architecture:1>") { prompt = "CURVED_ARCHI,CURVED_ARCHITECTURE," + prompt; }
+                if (value == "<lora:house_architecture_Exterior_SDlife_Chiasedamme:1>") { prompt = "HOUSE," + prompt; }
+
+                prompt += value;
             }
 
             int batchSize = 1;
@@ -93,37 +99,55 @@ namespace TJADSZY.ai
             if (!DA.GetData("input_image_height", ref height)) return;
             if (height <= 100) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "image height cant be less than 100"); }
 
-            bool controlnet = false;
-            if (!DA.GetData("input_controlnet_or_not", ref controlnet)) return;
+            List<bool> controlnet = new List<bool>();
+            if (!DA.GetDataList<bool>("input_controlnet_or_not", controlnet)) return;
 
             string nickName = "";
             if (!DA.GetData("input_nickname", ref nickName)) return;
-            if (nickName == "" && controlnet) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "nickName has no input"); return; }
+            if (nickName == "" && (controlnet[0] || controlnet[1])) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "nickName has no input"); return; }
             nickName = "baseImg/" + nickName + ".png";
 
             string rawBody = @"{
                 ""stable_diffusion_model"": """",
-                ""denoising_strength"": 0,
+                ""sd_vae"": ""vae-ft-mse-840000-ema-pruned.ckpt"",
+                ""denoising_strength"": 0.3,
                 ""prompt"": """", 
                 ""negative_prompt"":"""",
                 ""seed"": -1,
-                ""batch_size"": 5, 
+                ""batch_size"": 1, 
                 ""n_iter"": 1, 
-                ""steps"": 50, 
-                ""cfg_scale"": 7,
+                ""steps"": 100, 
+                ""cfg_scale"": 3,
                 ""width"": 700, 
                 ""height"": 512,
                 ""restore_faces"": false,
                 ""tiling"": false,
-                ""sampler_index"": ""Euler"",
+                ""sampler_index"": ""DDIM"",
                 ""alwayson_scripts"": {
                 ""controlnet"": {
                     ""args"": [
                             {
-                                ""image"":""baseImg/test.png"", //支持传输base64和oss对应图片path(png/jpg/jpeg)
-                                ""enabled"":true,
+                                ""image"":""baseImg/test.png"",
+                                ""enabled"":false,
                                 ""module"":""canny"",
-                                ""model"":""control_v11p_sd15_canny_fp16"",
+                                ""model"":""control_v11p_sd15_lineart"",
+                                ""weight"":1,
+                                ""resize_mode"":""Crop and Resize"",
+                                ""low_vram"":false,
+                                ""processor_res"":512,
+                                ""threshold_a"":100,
+                                ""threshold_b"":200,
+                                ""guidance_start"":0,
+                                ""guidance_end"":1,
+                                ""pixel_perfect"":true,
+                                ""control_mode"":0,
+                                ""input_mode"":""simple""
+                            },
+                            {
+                                ""image"":""baseImg/songziyu.png"",
+                                ""enabled"":false,
+                                ""module"":""none"",
+                                ""model"":""materialControl_v07"",
                                 ""weight"":1,
                                 ""resize_mode"":""Crop and Resize"",
                                 ""low_vram"":false,
@@ -149,11 +173,21 @@ namespace TJADSZY.ai
             tmpJsonObj["batch_size"] = batchSize;
             tmpJsonObj["width"] = width;
             tmpJsonObj["height"] = height;
-            tmpJsonObj["alwayson_scripts"]["controlnet"]["args"][0]["image"] = nickName;
-            tmpJsonObj["alwayson_scripts"]["controlnet"]["args"][0]["enabled"] = controlnet;
 
-            if(controlnet)
+            if(controlnet[0] || controlnet[1])
             {
+                if (controlnet[0])
+                {
+                    tmpJsonObj["alwayson_scripts"]["controlnet"]["args"][0]["image"] = nickName;
+                    tmpJsonObj["alwayson_scripts"]["controlnet"]["args"][0]["enabled"] = true;
+
+                }
+                if (controlnet[1])
+                {
+                    tmpJsonObj["alwayson_scripts"]["controlnet"]["args"][1]["image"] = nickName;
+                    tmpJsonObj["alwayson_scripts"]["controlnet"]["args"][1]["enabled"] = true;
+                }
+
                 this.Message = "Screenshotting";
                 string namedView = "";
                 if (!DA.GetData("input_namedView", ref namedView)) return;
